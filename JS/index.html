@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!--Leaflet Tutorial used to help create map "https://leafletjs.com/examples/quick-start/"-->
+	<title>Leaflet-Challenge</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+
+	
+</head>
+<body>
+
+
+
+<div id="mapid" style="width: 600px; height: 400px;"></div>
+<script>
+
+//Begin design of map
+//Set map to show full world map 
+	var map = L.map('mapid', {
+		center : [36.87962060502676, -11.953125],
+		zoom: 1
+ })
+
+//**************************************
+//Look up how to set bounds so user cannot zoom to zoom[0]
+//***************************************
+
+
+	//Use mapbox.com for a premade map on which to display GeoJson data
+	streetmap = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1
+	}).addTo(map);
+
+
+	//Hold base layers in a baseMap
+
+	var baseMap = {
+		"Street Map": streetmap
+	};
+
+
+	//Create buckets for color scale selection
+	var colors = ["#1E762E", "#54E36D", "#F0E751", "#ED8232", "#EE654A", "#F1310B" ];
+
+	//A funtion will assign funtions to each feature in the GeoJson
+	function onEachFeature(feature, layer) {
+  	layer.bindPopup("<h3>" + feature.properties.place +
+    	"</h3><p>Magnitude: " + feature.properties.mag +
+    	" | Depth: " + feature.geometry.coordinates[2] +
+    	"km</p>\n<hr>\n<p>" + new Date(feature.properties.time) + "</p>");
+}
+
+	//
+	function markerOptions(feature, latlng) {
+		var magni = feature.properties.mag;
+		var dep = feature.geometry.coordinates[2];
+
+		//The following loop will fill the colors depending on the depth of the earthquake
+		var fill;
+		if (depth < 10){
+			fill = colors[0];
+		}
+		else if (depth < 30) {
+			fill = colors[1];
+		}
+		else if (depth < 50) {
+			fill = colors[2];
+		}
+		else if (depth < 70) {
+			fill = colors[3];
+		}
+		else if (depth < 90) {
+			fill = colors[4];
+		}
+		else {
+			fill = colors[5];
+		}
+
+		//The following will set the marker size dependent on the magnitude or "magni"
+		var magSize = magni * 5;
+		var geojsonMArkerOption = {
+			color: "black",
+			fillColor: fill,
+			fillOpacity: 0.70,
+			weight: 1,
+			radius = magSize
+		}
+		return L.circleMarker(latlng, geojsonMarkerOptions);
+	}
+
+
+	//*******************************************
+	//Temporary GeoJson Data until api soulution
+	//*******************************************
+	var geojson = {"type":"FeatureCollection","metadata":{"generated":1608350890000,"url":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson","title":"USGS Significant Earthquakes, Past Week","status":200,"api":"1.10.3","count":1},"features":[{"type":"Feature","properties":{"mag":4.36,"place":"20 km SSE of Waimea, Hawaii","time":1607974071290,"updated":1608240521401,"tz":null,"url":"https://earthquake.usgs.gov/earthquakes/eventpage/hv72281637","detail":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/hv72281637.geojson","felt":899,"cdi":5.5,"mmi":5.809,"alert":"green","status":"reviewed","tsunami":0,"sig":787,"net":"hv","code":"72281637","ids":",pt20349001,hv72281637,us7000cr1n,","sources":",pt,hv,us,","types":",dyfi,losspager,origin,phase-data,shakemap,","nst":52,"dmin":null,"rms":0.12,"gap":209,"magType":"ml","type":"earthquake","title":"M 4.4 - 20 km SSE of Waimea, Hawaii"},"geometry":{"type":"Point","coordinates":[-155.568,19.865,24.59]},"id":"hv72281637"}]};
+
+	//Add GeoJson data to map
+	L.geoJson(geojson).addTo(map);
+
+	
+
+</script>
+
+
+
+</body>
+</html>
